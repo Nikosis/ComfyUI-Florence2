@@ -45,7 +45,7 @@ def create_path_dict(paths: list[str], predicate: Callable[[Path], bool] = lambd
             Default: Include everything
     """
 
-    flattened_paths = [item for path in paths for item in Path(path).iterdir() if predicate(item)]
+    flattened_paths = [item for path in paths if Path(path).exists() for item in Path(path).iterdir() if predicate(item)]
 
     return {item.name: str(item.absolute()) for item in flattened_paths}
 
@@ -454,7 +454,10 @@ class Florence2Run:
                 out_tensor = annotated_image_tensor[:3, :, :].unsqueeze(0).permute(0, 2, 3, 1).cpu().float()
                 out.append(out_tensor)
                
-                out_data.append(bboxes)
+                if task == 'caption_to_phrase_grounding':
+                    out_data.append(parsed_answer[task_prompt])
+                else:
+                    out_data.append(bboxes)
 
                 
                 pbar.update(1)
